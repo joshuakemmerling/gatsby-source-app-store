@@ -1,0 +1,1 @@
+declare module "gatsby-source-apple-app-store" {}
