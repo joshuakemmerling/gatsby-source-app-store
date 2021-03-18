@@ -1,35 +1,23 @@
 const APP_DATA_REGEX = /application\/ld\+json.*?>(.*?)</gim;
 const MORE_APP_DATA_REGEX = /<script.*?shoebox-ember-data-store[^>]*>(.*?)<\/script>/gmi;
-
 const FORMAT_IMAGE_URL = (url, width) => url.replace('{w}', width).replace('{h}', '0').replace('{c}', 'w').replace('{f}', 'jpg');
-
-const SCREENSHOT_MAP = ({
-  url,
-  width
-}) => FORMAT_IMAGE_URL(url, width);
-
-const VIDEO_MAP = ({
-  previewFrame: {
-    url,
-    width
-  },
-  video
-}) => ({
+const SCREENSHOT_MAP = ({ url, width }) => FORMAT_IMAGE_URL(url, width);
+const VIDEO_MAP = ({ previewFrame: { url, width }, video }) => ({
   video,
-  preview: FORMAT_IMAGE_URL(url, width)
+  preview: FORMAT_IMAGE_URL(url, width),
 });
-
 const REGEX_EXEC = (string, regex) => {
   const s = string.replace(/\r?\n|\r/g, ' ');
   const found = regex.exec(s);
+
   return JSON.parse(found[1]);
 };
 
-const getAppData = string => REGEX_EXEC(string, APP_DATA_REGEX);
+const getAppData = (string) => REGEX_EXEC(string, APP_DATA_REGEX);
 
-const getMoreAppData = string => REGEX_EXEC(string, MORE_APP_DATA_REGEX);
+const getMoreAppData = (string) => REGEX_EXEC(string, MORE_APP_DATA_REGEX);
 
-const cleanItunesData = app => ({
+const cleanItunesData = (app) => ({
   id: app.trackId,
   appId: app.bundleId,
   name: app.trackName,
@@ -62,19 +50,19 @@ const cleanItunesData = app => ({
   ipadScreenshots: app.ipadScreenshotUrls || [],
   tvScreenshots: app.appletvScreenshotUrls || [],
   macScreenshots: app.kind === 'mac-software' ? app.screenshotUrls : [],
-  supportedDevices: app.supportedDevices || []
+  supportedDevices: app.supportedDevices || [],
 });
 
-const cleanAppData = data => ({
+const cleanAppData = (data) => ({
   featuredImage: data.image,
-  operatingSystem: data.operatingSystem
+  operatingSystem: data.operatingSystem,
 });
 
 const cleanMoreAppData = (data, id) => {
-  const platformIds = [`${id}-ios`, `${id}-osx`, `${id}-appletvos`];
-  const editorialArtworkKeys = ['originalFlowcaseBrick', 'storeFlowcase', 'subscriptionHero', 'bannerUber', 'brandLogo'];
-  const editorialNotesKeys = ['tagline', 'standard', 'short'];
-  const platformsData = data[id].data.relationships.platforms.data.filter(a => {
+  const platformIds = [ `${id}-ios`, `${id}-osx`, `${id}-appletvos` ];
+  const editorialArtworkKeys = [ 'originalFlowcaseBrick', 'storeFlowcase', 'subscriptionHero', 'bannerUber', 'brandLogo' ];
+  const editorialNotesKeys = [ 'tagline', 'standard', 'short' ];
+  const platformsData = data[id].data.relationships.platforms.data.filter((a) => {
     return platformIds.indexOf(a.id) > -1;
   }).sort((a, b) => {
     const aIndex = platformIds.indexOf(a.id);
@@ -90,6 +78,7 @@ const cleanMoreAppData = (data, id) => {
 
     return 0;
   });
+
   const {
     privacyPolicyUrl = '',
     supportURLForLanguage = '',
@@ -98,26 +87,16 @@ const cleanMoreAppData = (data, id) => {
     subtitle = '',
     copyright = '',
     editorialNotes = {},
-    privacyPolicyText = ''
+    privacyPolicyText = '',
   } = platformsData[0].attributes;
-  const screenshotsByType = platformsData.reduce((a, {
-    attributes: {
-      screenshotsByType
-    }
-  }) => {
-    return { ...a,
-      ...screenshotsByType
-    };
+
+  const screenshotsByType = platformsData.reduce((a, { attributes: { screenshotsByType }}) => {
+    return { ...a, ...screenshotsByType };
   }, {});
-  const videoPreviewsByType = platformsData.reduce((a, {
-    attributes: {
-      videoPreviewsByType
-    }
-  }) => {
-    return { ...a,
-      ...videoPreviewsByType
-    };
+  const videoPreviewsByType = platformsData.reduce((a, { attributes: { videoPreviewsByType }}) => {
+    return { ...a, ...videoPreviewsByType };
   }, {});
+
   return {
     deviceFamilies: data[id].data.attributes.deviceFamilies || [],
     privacyPolicyUrl: privacyPolicyUrl,
@@ -125,11 +104,10 @@ const cleanMoreAppData = (data, id) => {
     subtitle: subtitle,
     copyright: copyright,
     privacyPolicyText: privacyPolicyText,
-    editorialNotes: editorialNotesKeys.reduce((a, c) => ({ ...a,
-      [c]: editorialNotes[c] || ''
-    }), {}),
-    editorialArtwork: editorialArtworkKeys.reduce((a, c) => ({ ...a,
-      [c]: editorialArtwork[c] ? FORMAT_IMAGE_URL(editorialArtwork[c].url, editorialArtwork[c].width) : ''
+    editorialNotes: editorialNotesKeys.reduce((a, c) => ({ ...a, [c]: editorialNotes[c] || '' }), {}),
+    editorialArtwork: editorialArtworkKeys.reduce((a, c) => ({
+      ...a,
+      [c]: editorialArtwork[c] ? FORMAT_IMAGE_URL(editorialArtwork[c].url, editorialArtwork[c].width) : '',
     }), {}),
     iphone55Screenshots: (screenshotsByType['iphone6+'] || []).map(SCREENSHOT_MAP),
     iphone65Screenshots: (screenshotsByType['iphone_6_5'] || screenshotsByType['iphone_5_8'] || []).map(SCREENSHOT_MAP),
@@ -141,14 +119,8 @@ const cleanMoreAppData = (data, id) => {
     iphone65MessageScreenshots: (messagesScreenshots['iphone_6_5'] || messagesScreenshots['iphone_5_8'] || []).map(SCREENSHOT_MAP),
     ipadMessageScreenshots: (messagesScreenshots['ipadPro_2018'] || messagesScreenshots['ipadPro'] || []).map(SCREENSHOT_MAP),
     iphone65Previews: (videoPreviewsByType['iphone_6_5'] || videoPreviewsByType['iphone_5_8'] || []).map(VIDEO_MAP),
-    macPreviews: (videoPreviewsByType['mac'] || []).map(VIDEO_MAP)
+    macPreviews: (videoPreviewsByType['mac'] || []).map(VIDEO_MAP),
   };
 };
 
-module.exports = {
-  getAppData,
-  getMoreAppData,
-  cleanItunesData,
-  cleanAppData,
-  cleanMoreAppData
-};
+module.exports = { getAppData, getMoreAppData, cleanItunesData, cleanAppData, cleanMoreAppData };

@@ -1,31 +1,20 @@
 const axios = require('axios');
+const { getAppData, getMoreAppData, cleanItunesData, cleanAppData, cleanMoreAppData } = require('./utilities');
 
-const {
-  getAppData,
-  getMoreAppData,
-  cleanItunesData,
-  cleanAppData,
-  cleanMoreAppData
-} = require('./utilities');
+exports.pluginOptionsSchema = ({ Joi }) =>
+  Joi.object().keys({
+    id: Joi.number()
+      .description(`Your app's Apple App Store ID.`)
+      .required()
+      .empty(),
+  });
 
-exports.pluginOptionsSchema = ({
-  Joi
-}) => Joi.object().keys({
-  id: Joi.number().description(`Your app's Apple App Store ID.`).required().empty()
-});
-
-exports.onPreInit = ({}, {
-  id
-}) => {
+exports.onPreInit = ({}, { id }) => {
   console.log(`Fetching app store information for ${id}.`);
 };
 
-exports.createSchemaCustomization = ({
-  actions
-}) => {
-  const {
-    createTypes
-  } = actions;
+exports.createSchemaCustomization = ({ actions }) => {
+  const { createTypes } = actions;
   const typeDefs = `
     type EditorialNotes implements Node {
       short: String!
@@ -99,28 +88,26 @@ exports.createSchemaCustomization = ({
       watchScreenshots: [String]!
     }
   `;
+
   createTypes(typeDefs);
 };
 
-exports.sourceNodes = async ({
-  actions,
-  createNodeId,
-  createContentDigest
-}, {
-  id
-}) => {
-  const {
-    createNode
-  } = actions;
+exports.sourceNodes = async ({ actions, createNodeId, createContentDigest }, { id }) => {
+  const { createNode } = actions;
+
   const itunesResponse = await axios.get(`https://itunes.apple.com/lookup?id=${id}&entity=software`);
   const itunesData = cleanItunesData(itunesResponse.data.results[0]);
+
   const appStoreResponse = await axios.get(itunesData.url);
   const appStoreData = cleanAppData(getAppData(appStoreResponse.data));
   const moreAppStoreData = cleanMoreAppData(getMoreAppData(appStoreResponse.data), id);
-  const appData = { ...itunesData,
+
+  const appData = {
+    ...itunesData,
     ...appStoreData,
-    ...moreAppStoreData
+    ...moreAppStoreData,
   };
+
   const nodeMeta = {
     id: createNodeId(`app-${appData.id}`),
     parent: null,
@@ -129,11 +116,14 @@ exports.sourceNodes = async ({
       type: 'AppStoreApp',
       mediaType: 'application/json',
       content: JSON.stringify(appData),
-      contentDigest: createContentDigest(appData)
+      contentDigest: createContentDigest(appData),
     },
-    appData
+    appData,
   };
+
   const node = Object.assign({}, appData, nodeMeta);
+
   createNode(node);
+
   return;
 };
