@@ -40,7 +40,8 @@ module.exports = {
 Here is the format of an app's data.
 
 ```
-appId: String
+appId: Int
+bundleId: String
 categories: [String]
 categoryIds: [String]
 contentRating: String
@@ -68,7 +69,6 @@ editorialNotes: {
 }
 featuredImage: String
 icon: String
-id: Int
 ipadMessageScreenshots: [String]
 ipadScreenshots: [String]
 iphone55MessageScreenshots: [String]

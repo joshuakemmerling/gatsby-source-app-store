@@ -1,6 +1,6 @@
 {
   "name": "gatsby-source-apple-app-store",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Gatsby source plugin for building websites using the App Store as a data source.",
   "repository": {
     "type": "git",

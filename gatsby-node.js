@@ -36,7 +36,8 @@ exports.createSchemaCustomization = ({ actions }) => {
     }
 
     type AppStoreApp implements Node {
-      appId: String!
+      appId: Int!
+      bundleId: String!
       categories: [String]!
       categoryIds: [String]!
       contentRating: String!
@@ -54,7 +55,6 @@ exports.createSchemaCustomization = ({ actions }) => {
       editorialNotes: EditorialNotes!
       featuredImage: String!
       icon: String!
-      id: Int!
       ipadMessageScreenshots: [String]!
       ipadScreenshots: [String]!
       iphone55MessageScreenshots: [String]!
@@ -109,7 +109,7 @@ exports.sourceNodes = async ({ actions, createNodeId, createContentDigest }, { i
   };
 
   const nodeMeta = {
-    id: createNodeId(`app-${appData.id}`),
+    id: createNodeId(`app-${appData.appId}`),
     parent: null,
     children: [],
     internal: {

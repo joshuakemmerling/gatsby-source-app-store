@@ -18,8 +18,8 @@ const getAppData = (string) => REGEX_EXEC(string, APP_DATA_REGEX);
 const getMoreAppData = (string) => REGEX_EXEC(string, MORE_APP_DATA_REGEX);
 
 const cleanItunesData = (app) => ({
-  id: app.trackId,
-  appId: app.bundleId,
+  appId: app.trackId,
+  bundleId: app.bundleId,
   name: app.trackName,
   url: app.trackViewUrl,
   description: app.description,
