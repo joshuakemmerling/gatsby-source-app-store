@@ -1,6 +1,6 @@
 # gatsby-source-apple-app-store
 
-Gatsby source plugin for pulling app information from Apple's app store for iPhone, iPad, Apple TV, Apple Watch, and Mac apps. It creates and entry so the data can be queried in Gatsby using GraphQL.
+Gatsby source plugin for pulling app information from Apple's App Store for iPhone, iPad, Apple TV, Apple Watch, and Mac apps. It creates and entry so the data can be queried in Gatsby using GraphQL.
 
 You can see an example of this plugin in use [here](https://sharp-engelbart-a2379e.netlify.app/).
 
